@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Analytics · Café Dashboard</title>
+<script src="chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="analytics.css"/>
+</head>
+<body>
+<!-- ── HEADER ─────────────────────────────────── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <span class="logo-icon">☕</span>
+    <div>
+      <div class="topbar-title">AI Demand Analytics</div>
+      <div class="topbar-sub">Smart Predictions · Café Intelligence</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span id="last-updated" class="badge-time">Loading...</span>
+    <a href="../index.html" class="btn-back">← Back to Admin</a>
+  </div>
+</header>
+
+<!-- ── LOADING OVERLAY ────────────────────────── -->
+<div id="loader" class="loader-overlay">
+  <div class="loader-box">
+    <div class="loader-spinner"></div>
+    <p>🤖 AI Engine Processing Orders...</p>
+  </div>
+</div>
+
+<main class="dashboard" id="main-content" style="display:none">
+
+  <!-- ── STAT STRIP ───────────────────────────── -->
+  <section class="stat-strip" id="stat-strip"></section>
+
+  <!-- ── AI INSIGHTS ──────────────────────────── -->
+  <section class="section">
+    <div class="section-header"><span class="section-icon">🤖</span> AI Insights Panel</div>
+    <div class="insights-grid" id="insights-panel"></div>
+  </section>
+
+  <!-- ── TOMORROW PREDICTION ──────────────────── -->
+  <section class="section">
+    <div class="section-header"><span class="section-icon">📅</span> Tomorrow's Demand Prediction</div>
+    <div id="tomorrow-day" class="tomorrow-label"></div>
+    <div class="prediction-grid" id="prediction-cards"></div>
+  </section>
+
+  <!-- ── CHARTS ROW 1 ─────────────────────────── -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">⏰ Peak Hours</div>
+      <canvas id="peakChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🍕 Top Selling Items</div>
+      <canvas id="topChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ── CHARTS ROW 2 ─────────────────────────── -->
+  <div class="charts-row">
+    <div class="chart-card chart-wide">
+      <div class="chart-title">📈 Weekly Demand Trend</div>
+      <canvas id="weeklyChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">💰 Revenue by Item</div>
+      <canvas id="revenueChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ── TRENDING + TOP ITEMS TABLE ───────────── -->
+  <div class="tables-row">
+    <div class="table-card">
+      <div class="chart-title">🔥 Trending Today</div>
+      <table class="data-table" id="trending-table">
+        <thead><tr><th>Item</th><th>Today</th><th>Avg/day</th><th>Growth</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="table-card">
+      <div class="chart-title">💎 High Revenue Products</div>
+      <table class="data-table" id="revenue-table">
+        <thead><tr><th>Item</th><th>Revenue (₹)</th><th>Share</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── KITCHEN SUGGESTIONS ──────────────────── -->
+  <section class="section">
+    <div class="section-header"><span class="section-icon">🍳</span> Smart Kitchen Suggestions</div>
+    <div class="suggestion-grid" id="kitchen-suggestions"></div>
+  </section>
+
+</main>
+
+<script src="analytics.js"></script>
+</body>
+</html>

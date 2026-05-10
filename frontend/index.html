@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrewToken — Smart Café System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<nav class="nav" id="mainNav">
+  <div class="nav-brand" onclick="showView('home')">
+    <div class="nav-logo">☕</div>
+    <div class="nav-name">Brew<span>Token</span></div>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <div class="nav-link active" onclick="showView('home');setActiveNav(this)">Home</div>
+    <div class="" onclick="showView('menu');setActiveNav(this)">Menu</div>
+    <div class="nav-link" onclick="showView('tracking');setActiveNav(this)">Track Order</div>
+  </div>
+  <div class="nav-right">
+    <div class="cart-btn" onclick="toggleCart()">🛒<span class="cart-badge" id="cartBadge" style="display:none">0</span></div>
+    <button class="admin-btn" onclick="showView('adminLogin')">Admin →</button>
+    <div class="hamburger" onclick="toggleMobileNav()"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<div class="view active" id="view-home">
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-badge"><span></span>Live Token System Active</div>
+    <h1>
+      <span class="line1">Skip the Queue,</span>
+      <span class="line2">Order Smarter.</span>
+    </h1>
+    <p class="hero-sub">Smart café ordering made simple.Order online, get a live token, and skip the crowd.Fast pickup. Zero confusion.</p>
+    <div class="hero-cta">
+    
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">2000+</div><div class="lbl">Orders Served</div></div>
+      <div class="hero-stat"><div class="num">~5 min</div><div class="lbl">Avg Prep Time</div></div>
+      <div class="hero-stat"><div class="num">0</div><div class="lbl">Queue Confusion</div></div>
+    </div>
+  </section>
+
+  <section class="how-section">
+    <div class="section-label">How It Works</div>
+    <div class="section-title">Order in 3 Simple Steps</div>
+    <p class="section-sub">From browsing to pickup — the entire process is digital, transparent, and instant.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">STEP 01</div>
+        <div class="step-icon">🍽️</div>
+        <div class="step-title">Browse & Add</div>
+        <div class="step-desc">Explore our menu, choose your favourites, add them to your cart — all from your phone.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">STEP 02</div>
+        <div class="step-icon">💳</div>
+        <div class="step-title">Pay & Confirm</div>
+        <div class="step-desc">Pay securely online. Your order is confirmed instantly and a unique token is generated.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">STEP 03</div>
+        <div class="step-icon">📦</div>
+        <div class="step-title">Track Live</div>
+        <div class="step-desc">Watch your order status update in real-time. Collect when your token is called.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">STEP 04</div>
+        <div class="step-icon">🎫</div>
+        <div class="step-title">Show Token</div>
+        <div class="step-desc">Just show your unique CAF token at the counter. Zero confusion, zero waiting in line.</div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:40px 24px 80px;max-width:1200px;margin:0 auto;">
+    <div class="section-label">Featured</div>
+    <div class="section-title">Today's Picks</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:32px;" id="featuredItems"></div>
+    <div style="text-align:center;margin-top:32px;">
+      <button class="btn-primary" onclick="showView('menu')">View Full Menu →</button>
+    </div>
+  </section>
+</div>
+
+<div class="view" id="view-menu">
+  <div class="menu-view">
+    <div class="menu-header">
+      <h2>Our Menu</h2>
+      <p>Fresh made daily — quality you can taste.</p>
+      <div class="menu-controls">
+        <div class="search-box">
+          <input type="text" placeholder="Search items..." id="menuSearch" oninput="filterMenu()" />
+        </div>
+        <div class="cat-tabs" id="catTabs"></div>
+      </div>
+    </div>
+    <div class="menu-grid" id="menuGrid"></div>
+  </div>
+</div>
+
+<div class="view" id="view-tracking">
+  <div class="tracking-view">
+    <div class="tracking-header">
+      <h2>Live Order Tracking</h2>
+      <p>Your order status updates in real-time</p>
+    </div>
+    <div id="trackingContent"></div>
+  </div>
+</div>
+
+<div class="view" id="view-adminLogin">
+  <div style="padding-top:64px;">
+    <div class="admin-login">
+      <div class="login-card">
+        <div class="login-logo">
+          <div class="icon">⚙️</div>
+          <h2>Admin Portal</h2>
+          <p>Brew Token Management System</p>
+        </div>
+        <div class="login-error" id="loginError">Invalid credentials. Please try again.</div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="adminUser" placeholder="admin" value="admin" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="adminPass" placeholder="••••••••" value="admin123" onkeydown="if(event.key==='Enter')doLogin()" />
+        </div>
+        <div class="login-hint">Demo credentials — Username: <strong>admin</strong> / Password: <strong>admin123</strong></div>
+        <button class="login-submit" onclick="doLogin()">Sign In →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="view" id="view-admin">
+  <div class="admin-view">
+    <div class="admin-sidebar">
+      <div class="sidebar-section">Overview</div>
+      <div class="sidebar-link active" onclick="showAdminPage('dashboard',this)"><span class="icon">📊</span>Dashboard</div>
+      <div class="sidebar-section">Orders</div>
+      <div class="sidebar-link" onclick="showAdminPage('orders',this)"><span class="icon">📋</span>Live Orders</div>
+      <div class="sidebar-link" onclick="showAdminPage('history',this)"><span class="icon">📁</span>Order History</div>
+      <a href="analytics/analytics.html" class="ai-analytics-btn">
+  <span>📊</span> View AI Analytics
+</a>
+      <div class="sidebar-section">Café</div>
+      <div class="sidebar-link" onclick="showAdminPage('menu',this)"><span class="icon">🍽️</span>Menu Management</div>
+      <div class="sidebar-link" onclick="showAdminPage('payments',this)"><span class="icon">💰</span>Payments</div>
+      <div class="sidebar-section">Account</div>
+      <div class="sidebar-link" onclick="adminLogout()"><span class="icon">🚪</span>Logout</div>
+    </div>
+    <div class="admin-main" id="adminMain"></div>
+  </div>
+</div>
+
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-drawer-head">
+    <h3>🛒 Your Cart</h3>
+    <div class="cart-close" onclick="toggleCart()">✕</div>
+  </div>
+  <div class="cart-items" id="cartItemsContainer"></div>
+  <div class="cart-footer">
+    <div class="cart-summary" id="cartSummary"></div>
+    <button class="pay-btn" id="payNowBtn" onclick="openPayment()">Proceed to Payment →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal" id="paymentModalContent"></div>
+</div>
+
+<div class="modal-overlay" id="productModal">
+  <div class="pf-modal" id="productModalContent"></div>
+</div>
+
+<audio id="orderSound" preload="auto">
+  <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJiVkHt7bm9ub3N0eXl8d3V0c3Z2e3p8f4CChYeGh4SCf36AhomKi4qKi4yMi4mIhoSCf32AhIaIiYmJiIiHh4iIiYqLi4uKiomIiIiIiYqLjI2NjIuKiYiHh4eHiIiJiomIh4eHh4eIiYqKiomIh4aGhoaGhoaGhoaGhISDgoKCgoKCgoKCgYGBgYCAgICAgICAf39/f39/f39/f4CAgYGBgIB/f39/gICBgoKCgoKCg4ODg4ODg4ODhISEhISEhISDg4KCgoKCgoGBgYGAgICAgICAgICAf39/f39/f39/f4A=" type="audio/wav" />
+</audio>
+
+<script src="script-new.js"></script>
+</body>
+</html>
