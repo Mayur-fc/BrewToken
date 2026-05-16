@@ -1,3 +1,4 @@
+console.log("🔥 SERVER.JS IS RUNNING");
 const dotenv = require('dotenv');
 dotenv.config();
 
