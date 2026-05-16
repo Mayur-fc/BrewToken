@@ -3,7 +3,7 @@
 
 // ── CONFIG ──────────────────────────────────────
 // Change this to match your backend URL
-const API_BASE = "http://localhost:5001/api/analytics";
+const API_BASE = "https://brewtoken.onrender.com/api/analytics";
 
 // Chart.js global defaults
 Chart.defaults.color = "#64748b";

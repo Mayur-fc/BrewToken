@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5001/api';
+const API_BASE = 'https://brewtoken.onrender.com/api';
 let cart = {};
 let products = [];
 let currentOrder = null;
