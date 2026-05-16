@@ -66,7 +66,7 @@ async function getDashboardData() {
     tomorrowPrediction: engine.getTomorrowPrediction(orders),
     revenueAnalytics: engine.getRevenueAnalytics(orders).slice(0, 6),
     weeklyDemand: engine.getWeeklyDemand(orders),
-    aiInsights: engine.generateAIInsights(orders),
+    aiInsights: await engine.generateAIInsights(orders),
     generatedAt: new Date().toISOString()
   };
 }

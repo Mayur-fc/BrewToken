@@ -69,7 +69,9 @@ function showError(msg) {
 function renderStatStrip(data) {
   const topItem = data.topItems?.[0];
   const totalRevenue = (data.revenueAnalytics || []).reduce((s, i) => s + i.totalRevenue, 0);
-  const peakHour = (data.peakHours || []).find(h => h.count > 0);
+  const peakHour = (data.peakHours || []).reduce(
+  (max, h) => h.count > (max?.count ?? 0) ? h : max, null
+);
 
   const stats = [
     { label: "Total Orders", value: data.totalOrders || 0, sub: "Last 30 days", cls: "stat-accent" },

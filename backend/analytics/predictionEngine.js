@@ -1,6 +1,7 @@
 // predictionEngine.js
-// Rule-based AI Demand Prediction Engine
-// NO machine learning - pure smart analytics
+// Rule-based AI Demand Prediction Engine + Groq AI Insights
+
+const Groq = require("groq-sdk");
 
 const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
@@ -81,9 +82,8 @@ function formatHour(h) {
 function getTomorrowPrediction(orders) {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowDay = tomorrow.getDay(); // 0=Sun ... 6=Sat
+  const tomorrowDay = tomorrow.getDay();
 
-  // Filter orders from same weekday in past 4 weeks
   const sameDayOrders = orders.filter(o => {
     const d = new Date(o.createdAt);
     return d.getDay() === tomorrowDay;
@@ -94,7 +94,6 @@ function getTomorrowPrediction(orders) {
   const sameDayMap = {};
   sameDayItems.forEach(i => sameDayMap[i.name] = i);
 
-  // Compute demand level per item
   const predictions = allItems.slice(0, 8).map(item => {
     const sameDayData = sameDayMap[item.name];
     const sameDayQty = sameDayData ? sameDayData.totalQty : 0;
@@ -171,37 +170,103 @@ function getWeeklyDemand(orders) {
 }
 
 /**
- * Generate AI-style insight messages
+ * Generate AI insights using Groq API
+ * Falls back to rule-based insights if Groq call fails
  */
-function generateAIInsights(orders) {
+async function generateAIInsights(orders) {
+  const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  const topItems  = getMostSellingItems(orders).slice(0, 5);
+  const peakHours = getPeakHours(orders).slice(0, 3);
+  const revenue   = getRevenueAnalytics(orders).slice(0, 5);
+  const tomorrow  = getTomorrowPrediction(orders);
+
+  const summary = {
+    totalOrders: orders.length,
+    topItems:    topItems.map(i => ({ name: i.name, qty: i.totalQty, revenue: i.totalRevenue })),
+    peakHours:   peakHours.map(h => ({ hour: h.label, orders: h.count })),
+    revenueShare: revenue.map(i => ({ name: i.name, share: i.revenueShare })),
+    tomorrowPredictions: tomorrow.predictions.map(p => ({ name: p.name, demandLevel: p.demandLevel })),
+    tomorrowDay: tomorrow.dayName,
+  };
+
+  try {
+    const response = await client.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      max_tokens: 800,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an expert café business analyst AI. " +
+            "Analyze the provided café sales data and return ONLY a valid JSON object with an insights array. " +
+            "No markdown, no extra text, just the JSON.",
+        },
+        {
+          role: "user",
+          content: `
+Analyze this café sales data and generate 5 smart, actionable business insights.
+
+Data:
+${JSON.stringify(summary, null, 2)}
+
+Return ONLY a JSON object in this exact format:
+{
+  "insights": [
+    { "icon": "📈", "text": "Your insight here..." },
+    { "icon": "⏰", "text": "Your insight here..." },
+    { "icon": "🔥", "text": "Your insight here..." },
+    { "icon": "💰", "text": "Your insight here..." },
+    { "icon": "♻️", "text": "Your insight here..." }
+  ]
+}
+
+Make insights specific to the data, actionable, and useful for a café owner.
+          `.trim(),
+        },
+      ],
+    });
+
+    const raw = response.choices?.[0]?.message?.content ?? "{}";
+    const cleaned = raw.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+    const parsed = JSON.parse(cleaned);
+
+    const insights = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray(parsed.insights)
+        ? parsed.insights
+        : null;
+
+    if (insights && insights.length > 0) return insights;
+    throw new Error("Unexpected AI response shape");
+
+  } catch (err) {
+    console.warn("Groq insights failed, using rule-based fallback:", err.message);
+    return generateRuleBasedInsights(topItems, peakHours, tomorrow, revenue);
+  }
+}
+
+/**
+ * Rule-based fallback insights (used if Groq fails)
+ */
+function generateRuleBasedInsights(topItems, peakHours, tomorrow, revenueItems) {
   const insights = [];
-  const topItems = getMostSellingItems(orders);
-  const peakHours = getPeakHours(orders);
-  const trending = getTrendingItems(orders);
-  const tomorrow = getTomorrowPrediction(orders);
 
   if (topItems.length > 0) {
-    insights.push({ type: "prediction", icon: "🤖", text: `${topItems[0].name} is your best seller with ${topItems[0].totalQty} units sold. Ensure consistent stock availability.` });
+    insights.push({ icon: "🤖", text: `${topItems[0].name} is your best seller with ${topItems[0].totalQty} units sold. Ensure consistent stock availability.` });
   }
   if (peakHours.length > 0 && peakHours[0].count > 0) {
-    insights.push({ type: "peak", icon: "⏰", text: `Peak ordering time is around ${peakHours[0].label}. Staff up and prep ingredients before this window.` });
+    insights.push({ icon: "⏰", text: `Peak ordering time is around ${peakHours[0].label}. Staff up and prep ingredients before this window.` });
   }
-  if (trending.length > 0 && trending[0].growthPct > 20) {
-    insights.push({ type: "trending", icon: "🔥", text: `${trending[0].name} is trending today with ${trending[0].growthPct}% above weekly average. Consider promoting it.` });
+  const highDemand = tomorrow.predictions.filter(p => p.demandLevel === "High");
+  const lowDemand  = tomorrow.predictions.filter(p => p.demandLevel === "Low");
+  if (highDemand.length > 0) {
+    insights.push({ icon: "📈", text: `Tomorrow (${tomorrow.dayName}), expect high demand for ${highDemand.map(p => p.name).join(", ")}. Prepare extra stock in advance.` });
   }
-  if (tomorrow.predictions.length > 0) {
-    const highDemand = tomorrow.predictions.filter(p => p.demandLevel === "High");
-    const lowDemand = tomorrow.predictions.filter(p => p.demandLevel === "Low");
-    if (highDemand.length > 0) {
-      insights.push({ type: "tomorrow", icon: "📈", text: `Tomorrow (${tomorrow.dayName}), expect high demand for ${highDemand.map(p => p.name).join(", ")}. Prepare extra stock in advance.` });
-    }
-    if (lowDemand.length > 0) {
-      insights.push({ type: "waste", icon: "♻️", text: `Reduce preparation of ${lowDemand.map(p => p.name).join(", ")} tomorrow to avoid food waste and cost overrun.` });
-    }
+  if (lowDemand.length > 0) {
+    insights.push({ icon: "♻️", text: `Reduce preparation of ${lowDemand.map(p => p.name).join(", ")} tomorrow to avoid food waste and cost overrun.` });
   }
-  const revenueItems = getRevenueAnalytics(orders);
   if (revenueItems.length > 0) {
-    insights.push({ type: "revenue", icon: "💰", text: `${revenueItems[0].name} generates the most revenue (${revenueItems[0].revenueShare}% of total). Feature it prominently on your menu.` });
+    insights.push({ icon: "💰", text: `${revenueItems[0].name} generates the most revenue (${revenueItems[0].revenueShare}% of total). Feature it prominently on your menu.` });
   }
 
   return insights;
@@ -214,5 +279,5 @@ module.exports = {
   getTomorrowPrediction,
   getRevenueAnalytics,
   getWeeklyDemand,
-  generateAIInsights
+  generateAIInsights,
 };
