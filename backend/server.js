@@ -14,17 +14,15 @@ const app = express();
 
 // ✅ Explicitly allow your Live Server origin
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    if (
-      origin.includes('vercel.app') ||
-      origin.includes('localhost')
-    ) {
-      return callback(null, true);
+  origin: function(origin, callback) {
+    if (!origin || 
+        origin.startsWith('http://127.0.0.1') || 
+        origin.startsWith('http://localhost') ||
+        origin.includes('vercel.app')) {  // ← Add this line
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
     }
-
-    return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
