@@ -3,7 +3,7 @@
 
 // ── CONFIG ──────────────────────────────────────
 // Change this to match your backend URL
-const API_BASE = "https://brewtoken.onrender.com/api/analytics";
+const API_BASE = "https://brewtoken.onrender.com/api";
 
 // Chart.js global defaults
 Chart.defaults.color = "#64748b";
@@ -24,7 +24,7 @@ window.addEventListener("DOMContentLoaded", loadAnalytics);
 
 async function loadAnalytics() {
   try {
-    const data = await fetchJSON(`${API_BASE}/dashboard`);
+    const data = await fetchJSON(`${API_BASE}/analytics/dashboard`)
     hideLoader();
     showDashboard();
 

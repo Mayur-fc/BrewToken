@@ -12,7 +12,7 @@ const { db } = require('./firebase/firebase');
 const analyticsRoutes = require('./analytics/analyticsRoutes');
 const app = express();
 
-// ✅ Explicitly allow your Live Server origin
+// ✅ Explicitly allow your Live Server origin 
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin || 
