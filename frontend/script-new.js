@@ -1,4 +1,4 @@
-const API_BASE = 'https://brew-token-backend.onrender.com/api';
+const API_BASE = 'https://brewtoken.onrender.com/api';
 const CART_KEY = 'brewtoken_cart';
 const ORDER_TOKEN_KEY = 'brewtoken_last_token';
 let cart = {};
